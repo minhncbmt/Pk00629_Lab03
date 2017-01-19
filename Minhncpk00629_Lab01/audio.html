@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html class="">
+<head>
+	<script src="//production-assets.codepen.io/assets/editor/live/console_runner-5710c30fb566082d9fcb6e7d97ee7e3f2a326128c9f334a4231b6fd752b29965.js"></script><script src="//production-assets.codepen.io/assets/editor/live/events_runner-d5e4bf42585b8da8c18f7d963dbfc17cd66a79aa586c9448c4de8d6952ee9d97.js"></script><script src="//production-assets.codepen.io/assets/editor/live/css_live_reload_init-25d1423d5d6fb975e7d61832d2c061422a94963ca446583b965dfc5569147311.js"></script><meta charset="UTF-8"><meta name="robots" content="noindex"><link rel="shortcut icon" type="image/x-icon" href="//production-assets.codepen.io/assets/favicon/favicon-8ea04875e70c4b0bb41da869e81236e54394d63638a1ef12fa558a4a835f1164.ico"><link rel="mask-icon" type="" href="//production-assets.codepen.io/assets/favicon/logo-pin-f2d2b6d2c61838f7e76325261b7195c27224080bc099486ddd6dccb469b8e8e6.svg" color="#111"><link rel="canonical" href="https://codepen.io/giana/pen/xZEdML">
+
+	<link rel="stylesheet prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+	<style class="cp-pen-styles">body {
+	  background: #18171c;
+	  overflow: hidden;
+	}
+
+	h1 {
+	  color: #fff;
+	  margin: 2em;
+	}
+	h1 a {
+	  color: yellow;
+	}
+	</style>
+	</head>
+	<body>
+<canvas id="canvas" width="980" height="226"></canvas>
+
+<h1>Load over <a href="https://codepen.io/giana/pen/xZEdML" target="_blank">HTTPS</a> &amp; allow mic access</h1>
+<script src="//production-assets.codepen.io/assets/common/stopExecutionOnTimeout-58d22c749295bca52f487966e382a94a495ac103faca9206cbd160bdf8aedf2a.js"></script>
+<script>/* SOUND */
+
+// Audio vars
+var audioCtx = new AudioContext(),
+    analyser,
+    bufferLength,
+    step,
+    frequencyData,
+    waveData;
+
+// Get microphone input
+if(navigator.webkitGetUserMedia) {
+  navigator.webkitGetUserMedia(
+    { audio: true },
+    
+    doAudioStuff,
+
+    function(error) {
+      canvas.width = 0;
+      canvas.height = 0;
+      console.log('Audio error: ' + error.name);
+    }
+  );
+} else {
+  navigator.mediaDevices.getUserMedia({audio: true})
+    .then(doAudioStuff)
+    .catch(function(error) {
+      console.log('Audio error: ' + error.name);
+    });
+}
+
+// Do the thing
+function doAudioStuff(mediaStream){
+  analyser = audioCtx.createAnalyser();
+  analyser.smoothingTimeConstant = 0.97;
+  analyser.fftSize = 1024;
+  step = analyser.fftSize / 16;
+  
+  bufferLength = analyser.frequencyBinCount;
+  frequencyData = new Uint8Array(bufferLength);
+  waveData = new Uint8Array(bufferLength);
+  
+  window.source = audioCtx.createMediaStreamSource(mediaStream);
+  source.connect(analyser);
+  
+  animate();
+};
+
+// Not used
+function averageVolume(data) {
+  var value = 0,
+      l = data.length;
+  
+  for(var i =0; i < l; i++) {
+    value += data[i];
+  }
+  
+  return value / l;
+}
+
+/* VISION */
+
+var canvas = document.getElementById('canvas'),
+    ctx = canvas.getContext('2d'),
+    w, h, w2, h2, h3, h4; // Canvas sizes
+
+function setCanvasSizes() {
+    w = canvas.width = window.innerWidth,
+    h = canvas.height = window.innerHeight,
+    
+    w2 = w/2,
+    h2 = h/2,
+    h3 = h/3,
+    h4 = h/4;
+};
+
+setCanvasSizes();
+
+function byteToNum(byte,min,max) {
+  var hue = (byte / 128) * (max - min) + min;
+  return Math.round(hue);
+}
+
+/* SOUND & VISION */
+
+// Animate frames
+function animate() {
+
+  analyser.getByteFrequencyData(frequencyData);
+  analyser.getByteTimeDomainData(waveData);
+
+  ctx.strokeStyle = 'hsl(' + byteToNum(frequencyData[0],1000,3600) + ', 90%, 60%)';
+  ctx.fillStyle = 'hsla(250,10%,10%,0.09)';
+
+  ctx.fillRect(0,0,w,h);
+
+  /* Lines */
+  ctx.beginPath();
+  for(var i = 0; i < bufferLength; i++) {
+    ctx.lineTo(Math.sin(frequencyData[i * step] / 20) * h3 + w2,
+               Math.cos(frequencyData[i * step] / 20) * h3 + h2);
+  }
+  ctx.closePath();
+  ctx.stroke();
+
+  /* Circles */
+  for(var i = 0; i < bufferLength; i++) {
+    ctx.beginPath();
+    ctx.arc(w2, h2, byteToNum(waveData[i * step] + frequencyData[i * step],h4,h3), 0, Math.PI*2 );
+    ctx.closePath();
+    ctx.stroke();
+  }
+    
+  requestAnimationFrame(animate);
+  
+};
+
+window.addEventListener('resize',function(){
+  setCanvasSizes();
+});
+//# sourceURL=pen.js
+</script>
+</body></html>

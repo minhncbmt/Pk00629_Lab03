@@ -1,0 +1,57 @@
+body {
+  font-family: Segoe UI Light;
+  background: url("http://wragg.io/content/images/2016/05/windows_10__hero__background__correct_scale__by_gamerverise-d903d5f.png") no-repeat;
+  background-size: cover;
+  padding: 50px;
+}
+
+.profile-wrapper {
+  background: #ff99cb;
+  margin: auto;
+  display: block;
+  height: 250px;
+  width: 250px;
+  border-radius: 50%;
+}
+.profile-pic {
+  padding: 25px;
+  height: 205px;
+  display: block;
+  margin: auto;
+}
+
+.name {
+  color: #fff;
+  text-align: center;
+  font-size: 65px;
+  line-height: 1px;
+}
+
+.login-wrapper input {
+  margin: auto;
+  display: block;
+  font-size: 20px;
+  padding: 8px;
+  background: none;
+  color: #fff;
+  width: 350px;
+  border: solid #fff 2px;
+  outline: none;
+}
+
+.login-wrapper input:focus {
+  background: rgba(0,0,0,.2); 
+}
+
+.btn-submit {
+  position: absolute;
+  right: 495px;
+  top: 441px;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 6px 12px 6px 12px;
+  border: solid 2px #fff;
+  background: #fff;
+  outline: none;
+  cursor: pointer;
+}
